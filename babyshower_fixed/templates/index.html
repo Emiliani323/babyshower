@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Regalos - Baby Shower</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f8ff; padding: 2em; }
+        h1 { color: #3b82f6; }
+        .regalo { background: white; border-radius: 10px; padding: 1em; margin-bottom: 1em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { background-color: #3b82f6; color: white; border: none; padding: 0.5em 1em; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #2563eb; }
+        input { padding: 0.5em; margin-bottom: 1em; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🎁 Lista de Regalos para el Baby Shower</h1>
+    <form action="/reservar" method="post">
+        <label for="nombre">Tu nombre:</label><br>
+        <input type="text" name="nombre" required><br>
+        <div>
+            {% for regalo in regalos %}
+                <div class="regalo">
+                    <strong>{{ regalo.nombre }}</strong><br>
+                    {% if regalo.reservado_por %}
+                        <em>Reservado por {{ regalo.reservado_por }}</em>
+                    {% else %}
+                        <a href="{{ regalo.link }}" target="_blank">Ver en Amazon</a><br>
+                        <button type="submit" name="regalo_index" value="{{ loop.index0 }}">Reservar</button>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </form>
+</body>
+</html>
