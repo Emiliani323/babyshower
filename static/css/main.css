@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Fonts */
+.font-playfair {
+    font-family: 'Playfair Display', serif;
+}
+
+.font-poppins {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Gift Card Animation */
+.gift-card {
+    transition: all 0.3s ease;
+    will-change: transform;
+}
+
+/* Confetti Canvas */
+#confetti-canvas {
+    z-index: -1;
+}
+
+/* Button Pulse Animation */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.reserve-btn:hover {
+    animation: pulse 1.5s infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #ec4899, #3b82f6);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #db2777, #2563eb);
+}
