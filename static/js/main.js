@@ -1,13 +1,5 @@
         document.addEventListener('DOMContentLoaded', () => {
             // GSAP Animations
-            gsap.from(".gift-card", {
-                duration: 0.8,
-                y: 50,
-                opacity: 0,
-                stagger: 0.1,
-                ease: "back.out(1.7)",
-                delay: 0.5
-            });
 
             // Hover animations
             document.querySelectorAll('.gift-card').forEach(card => {
