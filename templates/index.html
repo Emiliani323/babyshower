@@ -6,78 +6,7 @@
     <title>Gender Reveal Registry</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <style>
-      body {
-        font-family: "Poppins", sans-serif;
-        background: linear-gradient(to bottom right, #f0f9ff, #fdf2f8);
-        min-height: 100vh;
-        padding-top: 80px; /* Space for sticky header */
-      }
-      #confetti-canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 10;
-      }
-      .selected-card {
-        position: relative;
-        overflow: hidden;
-      }
-      .selected-card::after {
-        content: "SELECTED";
-        position: absolute;
-        top: 10px;
-        right: -30px;
-        width: 100px;
-        text-align: center;
-        background: #3b82f6;
-        color: white;
-        font-weight: bold;
-        transform: rotate(45deg);
-        font-size: 12px;
-      }
-      .modal-overlay {
-        background-color: rgba(0, 0, 0, 0.5);
-      }
-
-      .selected-card {
-        position: relative;
-        overflow: hidden;
-        border: 3px solid #3b82f6 !important; /* Blue border */
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
-      }
-      .selected-card::after {
-        content: "SELECTED";
-        position: absolute;
-        top: 12px; /* Adjusted position */
-        right: -32px; /* Adjusted position */
-        width: 110px; /* Slightly wider */
-        text-align: center;
-        background: #3b82f6;
-        color: white;
-        font-weight: bold;
-        transform: rotate(45deg);
-        font-size: 11px; /* Slightly smaller */
-        padding: 2px 0;
-        letter-spacing: 0.5px;
-      }
-
-      #confirmation-header {
-        transition: all 0.3s ease;
-      }
-      .confirm-disabled {
-        background: #e5e7eb !important;
-        color: #9ca3af !important;
-        cursor: not-allowed;
-      }
-      .confirm-enabled {
-        background: linear-gradient(to right, #ec4899, #3b82f6) !important;
-        color: white !important;
-      }
-    </style>
+    <link rel="stylesheet" href="/static/css/main.css">
   </head>
   <body>
     <!-- Confetti Canvas -->
@@ -88,29 +17,39 @@
       id="confirmation-header"
       class="fixed top-0 left-0 w-full bg-white shadow-md z-30 hidden"
     >
-      <div
-        class="container mx-auto px-4 py-3 flex items-center justify-between"
-      >
-        <div class="flex-1 min-w-0">
-          <div id="selection-instructions" class="text-sm text-gray-500 italic">
-            Please select a gift and enter your name
-          </div>
-          <div class="flex items-baseline truncate">
-            <span class="font-semibold hidden md:inline">Selected Gift:</span>
-            <span
-              id="selected-gift-name"
-              class="ml-2 text-blue-600 truncate"
-            ></span>
-            <span id="selected-for" class="ml-4 font-medium truncate"></span>
-          </div>
-        </div>
-        <button
-          id="confirm-reservation"
-          disabled
-          class="px-6 py-2 rounded-lg confirm-disabled transition-all"
+      <div class="container mx-auto px-3 py-2 sm:px-4 sm:py-3">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0"
         >
-          Confirm Reservation
-        </button>
+          <div class="min-w-0">
+            <div
+              id="selection-instructions"
+              class="text-xs sm:text-sm text-gray-500 italic truncate"
+            >
+              Please select a gift and enter your name
+            </div>
+            <div class="flex flex-wrap items-baseline gap-x-2 truncate">
+              <span class="font-semibold text-sm sm:text-base hidden sm:inline"
+                >Selected:</span
+              >
+              <span
+                id="selected-gift-name"
+                class="text-blue-600 text-sm sm:text-base truncate max-w-[120px] sm:max-w-[200px]"
+              ></span>
+              <span
+                id="selected-for"
+                class="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-none"
+              ></span>
+            </div>
+          </div>
+          <button
+            id="confirm-reservation"
+            disabled
+            class="mt-1 sm:mt-0 px-4 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-lg confirm-disabled transition-all whitespace-nowrap"
+          >
+            Confirm Reservation
+          </button>
+        </div>
       </div>
     </div>
 

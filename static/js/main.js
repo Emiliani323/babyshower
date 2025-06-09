@@ -74,36 +74,52 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmationModal.classList.add("hidden");
   });
 
-  // Update the updateConfirmationHeader function
-  function updateConfirmationHeader() {
+function updateConfirmationHeader() {
     const name = guestNameInput.value.trim();
-    const instructions = document.getElementById("selection-instructions");
+    const instructions = document.getElementById('selection-instructions');
+    const isMobile = window.innerWidth < 640;
+    
+    // Reset states
+    confirmBtn.disabled = true;
+    confirmBtn.classList.remove('confirm-enabled');
+    confirmBtn.classList.add('confirm-disabled');
+    instructions.classList.remove('hidden');
 
-    if (selectedGift && name) {
-      // Valid selection
-      selectedFor.textContent = `For: ${name}`;
-      confirmBtn.disabled = false;
-      confirmBtn.classList.remove("confirm-disabled");
-      confirmBtn.classList.add("confirm-enabled");
-      instructions.classList.add("hidden");
+    if (selectedGift) {
+        // Always show full gift name (no truncation)
+        const giftName = selectedGift.querySelector('h3').textContent.trim();
+        selectedGiftName.textContent = giftName;
+        
+        if (name) {
+            // Valid complete selection
+            selectedFor.textContent = isMobile ? name : `For: ${name}`;
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('confirm-disabled');
+            confirmBtn.classList.add('confirm-enabled');
+            instructions.classList.add('hidden');
+        } else {
+            // Missing name
+            selectedFor.textContent = '';
+            instructions.textContent = 'Please enter your name';
+        }
     } else {
-      // Invalid selection
-      selectedFor.textContent = "";
-      confirmBtn.disabled = true;
-      confirmBtn.classList.remove("confirm-enabled");
-      confirmBtn.classList.add("confirm-disabled");
-
-      if (!selectedGift && !name) {
-        instructions.textContent = "Please select a gift and enter your name";
-      } else if (!selectedGift) {
-        instructions.textContent = "Please select a gift";
-      } else {
-        instructions.textContent = "Please enter your name";
-      }
-      instructions.classList.remove("hidden");
+        // No gift selected
+        selectedGiftName.textContent = '';
+        selectedFor.textContent = '';
+        instructions.textContent = name 
+            ? 'Please select a gift' 
+            : 'Please select a gift and enter your name';
     }
-  }
 
+    // Mobile-specific layout adjustments
+    if (isMobile) {
+        confirmationHeader.classList.toggle('compact-mode', true);
+    } else {
+        confirmationHeader.classList.toggle('compact-mode', false);
+    }
+}
+
+  window.addEventListener("resize", updateConfirmationHeader);
   // Update the gift selection event listener
   document.querySelectorAll(".select-gift").forEach((button) => {
     button.addEventListener("click", function () {
