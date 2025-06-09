@@ -11,10 +11,7 @@
         font-family: "Poppins", sans-serif;
         background: linear-gradient(to bottom right, #f0f9ff, #fdf2f8);
         min-height: 100vh;
-      }
-      .gift-card {
-        transition: all 0.3s ease;
-        transform-origin: center;
+        padding-top: 80px; /* Space for sticky header */
       }
       #confetti-canvas {
         position: fixed;
@@ -25,19 +22,107 @@
         pointer-events: none;
         z-index: 10;
       }
+      .selected-card {
+        position: relative;
+        overflow: hidden;
+      }
+      .selected-card::after {
+        content: "SELECTED";
+        position: absolute;
+        top: 10px;
+        right: -30px;
+        width: 100px;
+        text-align: center;
+        background: #3b82f6;
+        color: white;
+        font-weight: bold;
+        transform: rotate(45deg);
+        font-size: 12px;
+      }
+      .modal-overlay {
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .selected-card {
+        position: relative;
+        overflow: hidden;
+        border: 3px solid #3b82f6 !important; /* Blue border */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+      }
+      .selected-card::after {
+        content: "SELECTED";
+        position: absolute;
+        top: 12px; /* Adjusted position */
+        right: -32px; /* Adjusted position */
+        width: 110px; /* Slightly wider */
+        text-align: center;
+        background: #3b82f6;
+        color: white;
+        font-weight: bold;
+        transform: rotate(45deg);
+        font-size: 11px; /* Slightly smaller */
+        padding: 2px 0;
+        letter-spacing: 0.5px;
+      }
+
+      #confirmation-header {
+        transition: all 0.3s ease;
+      }
+      .confirm-disabled {
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
+        cursor: not-allowed;
+      }
+      .confirm-enabled {
+        background: linear-gradient(to right, #ec4899, #3b82f6) !important;
+        color: white !important;
+      }
     </style>
   </head>
   <body>
     <!-- Confetti Canvas -->
     <canvas id="confetti-canvas"></canvas>
 
+    <!-- Sticky Confirmation Header -->
+    <div
+      id="confirmation-header"
+      class="fixed top-0 left-0 w-full bg-white shadow-md z-30 hidden"
+    >
+      <div
+        class="container mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <div class="flex-1 min-w-0">
+          <div id="selection-instructions" class="text-sm text-gray-500 italic">
+            Please select a gift and enter your name
+          </div>
+          <div class="flex items-baseline truncate">
+            <span class="font-semibold hidden md:inline">Selected Gift:</span>
+            <span
+              id="selected-gift-name"
+              class="ml-2 text-blue-600 truncate"
+            ></span>
+            <span id="selected-for" class="ml-4 font-medium truncate"></span>
+          </div>
+        </div>
+        <button
+          id="confirm-reservation"
+          disabled
+          class="px-6 py-2 rounded-lg confirm-disabled transition-all"
+        >
+          Confirm Reservation
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
     <div class="container mx-auto px-4 py-12 relative z-20">
       <!-- Header -->
       <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">👶</h1>
         <h1
           class="text-4xl md:text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500"
         >
-          👶 Gender Reveal Gift Registry
+          Gender Reveal Gift Registry
         </h1>
         <p class="text-lg text-gray-600">
           Celebrate with us by reserving a gift!
@@ -57,7 +142,13 @@
       </div>
 
       <!-- Main Form -->
-      <form method="POST" action="/reserve" class="max-w-4xl mx-auto">
+      <form
+        method="POST"
+        action="/reserve"
+        id="reservation-form"
+        class="max-w-4xl mx-auto"
+      >
+        <input type="hidden" name="gift_id" id="form-gift-id" />
         <div class="mb-6 bg-white rounded-xl shadow-lg p-6">
           <label class="block text-lg font-semibold text-gray-700 mb-2"
             >Your Name</label
@@ -65,28 +156,38 @@
           <input
             type="text"
             name="name"
+            id="guest-name"
             required
             class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-all"
           />
         </div>
 
-        <!-- Gift Grid - NOW VISIBLE -->
+        <!-- Gift Grid -->
         <div
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           id="gift-grid"
         >
           {% for gift in gifts %}
           <div
-            class="gift-card bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all border-2 {% if gift.reserved_by %}border-gray-200{% else %}border-transparent hover:border-pink-200{% endif %}"
+            class="gift-card relative bg-white rounded-lg overflow-hidden shadow-md transition-all border-2 {% if gift.reserved_by %}border-gray-300 bg-gray-50{% else %}border-transparent hover:border-pink-200{% endif %}"
+            data-gift-id="{{ gift.id }}"
           >
             <div class="p-5">
-              <h3 class="text-lg font-semibold text-gray-800 mb-2">
+              <h3
+                class="text-lg font-semibold {% if gift.reserved_by %}text-gray-500{% else %}text-gray-800{% endif %} mb-2"
+              >
                 {{ gift.name }}
               </h3>
 
               {% if gift.reserved_by %}
               <div class="text-sm text-pink-600 font-medium mb-3">
-                Reserved by: {{ gift.reserved_by }}
+                RESERVED BY:
+                <span class="uppercase">{{ gift.reserved_by }}</span>
+              </div>
+              <div
+                class="absolute top-2 right-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs font-bold"
+              >
+                Reserved
               </div>
               {% else %}
               <a
@@ -97,12 +198,10 @@
                 View on Amazon
               </a>
               <button
-                type="submit"
-                name="gift_id"
-                value="{{ gift.id }}"
-                class="w-full bg-gradient-to-r from-pink-500 to-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-all hover:opacity-90 reserve-btn"
+                type="button"
+                class="select-gift w-full bg-gradient-to-r from-pink-500 to-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-all hover:opacity-90"
               >
-                Reserve Gift
+                Select Gift
               </button>
               {% endif %}
             </div>
@@ -110,6 +209,43 @@
           {% endfor %}
         </div>
       </form>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div
+      id="confirmation-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay"
+    >
+      <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+          Confirm Reservation
+        </h3>
+        <p class="mb-2">
+          <span class="font-semibold">Gift:</span>
+          <span id="modal-gift-name"></span>
+        </p>
+        <p class="mb-6">
+          <span class="font-semibold">Reserved by:</span>
+          <span id="modal-guest-name" class="uppercase"></span>
+        </p>
+
+        <div class="flex justify-end space-x-4">
+          <button
+            id="cancel-reservation"
+            type="button"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+          >
+            Go Back
+          </button>
+          <button
+            id="final-confirm"
+            type="button"
+            class="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg hover:opacity-90"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
     </div>
 
     <script src="/static/js/main.js"></script>
