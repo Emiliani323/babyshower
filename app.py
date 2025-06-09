@@ -5,8 +5,8 @@ from database import init_db, get_all_gifts, reserve_gift
 app = Flask(__name__, static_folder='static')
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')
 
-@app.before_first_request
-def initialize():
+# New way to initialize database (replaces before_first_request)
+with app.app_context():
     init_db()
 
 @app.route("/")
