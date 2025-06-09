@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gender Reveal Registry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="icon" type="image/x-icon" href="/static/icons/favicon.ico">
+    <meta name="msapplication-TileColor" content="#da532c" />
+
+    <meta name="theme-color" content="#ffffff" />
+  </head>
+  <body>
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Sticky Confirmation Header -->
+    <div
+      id="confirmation-header"
+      class="fixed top-0 left-0 w-full bg-white shadow-md z-30 hidden"
+    >
+      <div class="container mx-auto px-3 py-2 sm:px-4 sm:py-3">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0"
+        >
+          <div class="min-w-0">
+            <div
+              id="selection-instructions"
+              class="text-xs sm:text-sm text-gray-500 italic truncate"
+            >
+              Please select a gift and enter your name
+            </div>
+            <div class="flex flex-wrap items-baseline gap-x-2 truncate">
+              <span class="font-semibold text-sm sm:text-base hidden sm:inline"
+                >Selected:</span
+              >
+              <span
+                id="selected-gift-name"
+                class="text-blue-600 text-sm sm:text-base truncate max-w-[120px] sm:max-w-[200px]"
+              ></span>
+              <span
+                id="selected-for"
+                class="font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-none"
+              ></span>
+            </div>
+          </div>
+          <button
+            id="confirm-reservation"
+            disabled
+            class="mt-1 sm:mt-0 px-4 py-1 sm:px-6 sm:py-2 text-sm sm:text-base rounded-lg confirm-disabled transition-all whitespace-nowrap"
+          >
+            Confirm Reservation
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-12 relative z-20">
+      <!-- Header -->
+      <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">👶</h1>
+        <h1
+          class="text-4xl md:text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500"
+        >
+          Gender Reveal Gift Registry
+        </h1>
+        <p class="text-lg text-gray-600">
+          Celebrate with us by reserving a gift!
+        </p>
+      </header>
+
+      <!-- Flash Messages -->
+      <div id="flash-messages" class="max-w-2xl mx-auto mb-8">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="flash-message p-4 mb-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
+      </div>
+
+      <!-- Main Form -->
+      <form
+        method="POST"
+        action="/reserve"
+        id="reservation-form"
+        class="max-w-4xl mx-auto"
+      >
+        <input type="hidden" name="gift_id" id="form-gift-id" />
+        <div class="mb-6 bg-white rounded-xl shadow-lg p-6">
+          <label class="block text-lg font-semibold text-gray-700 mb-2"
+            >Your Name</label
+          >
+          <input
+            type="text"
+            name="name"
+            id="guest-name"
+            required
+            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-all"
+          />
+        </div>
+
+        <!-- Gift Grid -->
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          id="gift-grid"
+        >
+          {% for gift in gifts %}
+          <div
+            class="gift-card relative bg-white rounded-lg overflow-hidden shadow-md transition-all border-2 {% if gift.reserved_by %}border-gray-300 bg-gray-50{% else %}border-transparent hover:border-pink-200{% endif %}"
+            data-gift-id="{{ gift.id }}"
+          >
+            <div class="p-5">
+              <h3
+                class="text-lg font-semibold {% if gift.reserved_by %}text-gray-500{% else %}text-gray-800{% endif %} mb-2"
+              >
+                {{ gift.name }}
+              </h3>
+
+              {% if gift.reserved_by %}
+              <div class="text-sm text-pink-600 font-medium mb-3">
+                RESERVED BY:
+                <span class="uppercase">{{ gift.reserved_by }}</span>
+              </div>
+              <div
+                class="absolute top-2 right-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs font-bold"
+              >
+                Reserved
+              </div>
+              {% else %}
+              <a
+                href="{{ gift.link }}"
+                target="_blank"
+                class="inline-block text-blue-600 hover:text-blue-800 text-sm font-medium mb-3"
+              >
+                View on Amazon
+              </a>
+              <button
+                type="button"
+                class="select-gift w-full bg-gradient-to-r from-pink-500 to-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-all hover:opacity-90"
+              >
+                Select Gift
+              </button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div
+      id="confirmation-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay"
+    >
+      <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+          Confirm Reservation
+        </h3>
+        <p class="mb-2">
+          <span class="font-semibold">Gift:</span>
+          <span id="modal-gift-name"></span>
+        </p>
+        <p class="mb-6">
+          <span class="font-semibold">Reserved by:</span>
+          <span id="modal-guest-name" class="uppercase"></span>
+        </p>
+
+        <div class="flex justify-end space-x-4">
+          <button
+            id="cancel-reservation"
+            type="button"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
+          >
+            Go Back
+          </button>
+          <button
+            id="final-confirm"
+            type="button"
+            class="px-4 py-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white rounded-lg hover:opacity-90"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+  </body>
+</html>
