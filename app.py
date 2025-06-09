@@ -5,7 +5,7 @@ from database import init_db, get_all_gifts, reserve_gift
 app = Flask(__name__, static_folder='static')
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')
 
-# New way to initialize database (replaces before_first_request)
+# Initialize DB when app starts
 with app.app_context():
     init_db()
 
@@ -13,25 +13,22 @@ with app.app_context():
 def index():
     error = request.args.get('error')
     if error == 'already_reserved':
-        flash('This gift has already been reserved by someone else. Please choose another.', 'error')
+        flash('This gift was already reserved. Please choose another.', 'error')
     return render_template("index.html", gifts=get_all_gifts())
 
 @app.route("/reserve", methods=["POST"])
 def reserve():
-    guest_name = request.form.get("name", "").strip()
+    name = request.form.get("name", "").strip()
     gift_id = request.form.get("gift_id")
     
-    if not guest_name or not gift_id:
+    if not name or not gift_id:
         flash('Please enter your name and select a gift', 'error')
         return redirect("/")
     
-    try:
-        if reserve_gift(int(gift_id), guest_name):
-            flash(f'Thank you {guest_name}! You have successfully reserved your gift.', 'success')
-        else:
-            return redirect("/?error=already_reserved")
-    except ValueError:
-        flash('Invalid gift ID', 'error')
+    if reserve_gift(int(gift_id), name):
+        flash(f'Thank you {name}! Gift reserved successfully.', 'success')
+    else:
+        return redirect("/?error=already_reserved")
     
     return redirect("/")
 

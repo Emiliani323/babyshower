@@ -1,12 +1,3 @@
-def get_amazon_image_url(link):
-    try:
-        # Extract ASIN from Amazon URL
-        asin = link.split('/dp/')[-1].split('/')[0].split('?')[0]
-        if len(asin) == 10:  # Standard ASIN length
-            return f"https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN={asin}&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=SL250"
-    except Exception as e:
-        print(f"Error generating image URL for {link}: {str(e)}")
-    return None
 
 # Raw gift data without image URLs
 raw_gifts = [
@@ -52,6 +43,3 @@ raw_gifts = [
     {"name": "Dancing Talking Cactus Toy for Baby Toddler, Boys Girls Gifts Singing Mimicking", "link": "https://www.amazon.com/dp/B0C1SJVKCH", "reserved_by": None},
     {"name": "Baby Einstein 4-in-1 Kickin' Tunes Music and Language Play Gym and Piano", "link": "https://www.amazon.com/dp/B07MPCCDM7", "reserved_by": None}
 ]
-
-# Process all gifts to add image URLs automatically
-initial_gifts = [{**gift, "image_url": get_amazon_image_url(gift["link"])} for gift in raw_gifts]
